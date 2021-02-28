@@ -1,0 +1,98 @@
+<?php
+
+class {entity}
+{    
+
+    public function __construct()
+    {
+
+    }
+
+    public function insert($obj)
+    {
+        $db = dbhandler::getInstance();
+        $sql = "insert {table} "
+            . "( {fields}) "
+            . " values({values}); ";
+
+        $values = array();
+        {setvalues}
+        
+        $sth = $db->dbh->prepare($sql);
+        $sth->execute($values);
+        return $db->dbh->lastInsertId();
+
+    }
+
+    public function select()
+    {
+
+        $requesthandler =  new requesthandler();
+
+        $db = dbhandler::getInstance();
+        $sql = "select * from {table} ";                    
+        
+                            
+         if(requestHandler::get()!=null){
+             $id = requestHandler::get()->id;            
+             $sql .= " where id=". $id;
+         }   
+
+        $sth = $db->dbh->prepare($sql);
+        $sth->execute();
+        $results = $sth->fetchAll(PDO::FETCH_OBJ);
+        
+
+        foreach ($results as $row) {
+            $data['data'][] = array(
+                {selectarray}
+
+            );
+        }
+
+        return $data;
+    }
+
+
+    public function delete($id)
+    {
+        $db = dbhandler::getInstance();
+        $sql = "delete from {table} where id = $id";
+        $sth = $db->dbh->prepare($sql);
+        $sth->execute();
+
+        $rowsupdates = $sth->rowCount();
+        if($rowsupdates == 0){
+            return array('delete'=>false, "records"=>$rowsupdates);
+        }else{
+            return array('delete'=>true, "records"=>$rowsupdates);
+        }
+    }
+
+    public function update($obj)
+    {
+        $db = dbhandler::getInstance();
+        $sql = "update {table} "
+            . " set {updatecols} ";                
+
+
+        $sql .= " where id=:id";
+        
+        $values = array();
+        {updatevalues}
+
+
+        $values[":id"] = $obj->id;
+        
+        $sth = $db->dbh->prepare($sql);
+        $sth->execute($values);
+
+        $rowsupdates = $sth->rowCount();
+        if($rowsupdates == 0){
+            return array('update'=>false, "records"=>$rowsupdates);
+        }else{
+            return array('update'=>true, "records"=>$rowsupdates);
+        }
+    }    
+    
+}

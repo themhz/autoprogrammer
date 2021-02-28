@@ -1,0 +1,39 @@
+select a list all tables in the database
+
+SELECT * FROM information_schema.tables
+WHERE table_schema = 'erg3_theotokatos';
+*******************************************************
+
+get all fields from each table
+
+select * 
+  from information_schema.columns 
+ where table_schema = 'erg3_theotokatos' 
+   and table_name = 'courses'
+   ;
+
+*******************************************************
+get all relations from forein keys for each table
+
+SELECT 
+  *
+FROM
+  INFORMATION_SCHEMA.KEY_COLUMN_USAGE
+WHERE
+  REFERENCED_TABLE_SCHEMA = 'erg3_theotokatos' AND
+  REFERENCED_TABLE_NAME = 'courses';
+
+******************************************************
+create class
+
+create model για έναν πίνακα
+Πηγαίνεις και παίρνεις όλα τα πεδία για αυτόν τον πίνακα
+Βρίσκεις το primary key και το κάνεις προτεύον
+βρίσκεις τα foreign keys
+Φτιάχνεις το select με επιλογή σε επιλεγμένα πεδία
+Φτιάχνεις το update με επιλογή σε επιλεγμένα πεδία
+Φτιάχνεις το delete
+Φτιάχνεις το insert
+Φτιάχνεις τα κατηγορήματα για κάθε πεδίο
+
+
