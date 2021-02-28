@@ -13,6 +13,7 @@ import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import javax.swing.JTable;
 
 /**
  *
@@ -33,7 +34,7 @@ public class AutoProgrammer {
     public static ArrayList<MySqlTable> createViewsAndControllers() throws SQLException, ClassNotFoundException {
         Class.forName("com.mysql.jdbc.Driver");
         Connection con = (Connection) DriverManager.getConnection("jdbc:mysql://localhost:3306/erg3_theotokatos", "root", "");
-        //ResultSet rsTables = MysqlHandler.getAllTables();
+
         ArrayList<MySqlTable> tables = MysqlHandler.getAllTables();
 
         for (MySqlTable table : tables) {
@@ -98,7 +99,7 @@ public class AutoProgrammer {
             selectcounter = 0;
             counter = 0;
 
-            String filecontents = FileHandler.openFile("model_sample.template");            
+            String filecontents = FileHandler.openFile("model_sample.template");
             System.out.println("for " + table);
             filecontents = filecontents.replace("{entity}", table.getName().substring(0, 1).toUpperCase() + table.getName().substring(1));
             filecontents = filecontents.replace("{table}", table.getName());
@@ -114,28 +115,105 @@ public class AutoProgrammer {
             setvalues = "";
             System.out.println(filecontents);
             System.out.println("-----------------------");
-            FileHandler.createFile("C:\\wamp64\\www\\testphp\\" + table.getName(), filecontents);            
+            FileHandler.createFile("C:\\wamp64\\www\\testphp\\" + table.getName(), filecontents);
 
-        }        
+        }
     }
-    
-    public static void createControllers(){
+
+    public static void createControllers() {
         ArrayList<MySqlTable> tables = MysqlHandler.getAllTables();
 
         for (MySqlTable table : tables) {
-            
 
-            String filecontents = FileHandler.openFile("controller.template");            
+            String filecontents = FileHandler.openFile("controller.template");
             System.out.println("for " + table.getName());
-            
+
             filecontents = filecontents.replace("{tablename}", table.getName());
             filecontents = filecontents.replace("{Tablename}", table.getName().substring(0, 1).toUpperCase() + table.getName().substring(1));
 
             System.out.println(filecontents);
             System.out.println("-----------------------");
-            FileHandler.createFile("C:\\wamp64\\www\\testphp\\" + table.getName() + "\\", "controller", filecontents);            
+            FileHandler.createFile("C:\\wamp64\\www\\testphp\\" + table.getName() + "\\", "controller", filecontents);
 
-        }  
+        }
     }
 
+    public static void createViews(JTable tblfields, String table) {
+
+        String name = "";
+        String datatype = "";
+        String htmltype = "";
+        String fields = "";
+        for (int i = 0; i < tblfields.getRowCount(); i++) {  // Loop through the rows
+
+            name = tblfields.getValueAt(i, 0).toString();
+            datatype = tblfields.getValueAt(i, 1).toString();
+            htmltype = tblfields.getValueAt(i, 2).toString();
+            System.out.println(name + " " + datatype + " " + htmltype);
+            
+            switch (htmltype) {
+                case "textbox":
+                    fields += "<label for=\""+name+"\">"+name+":</label><br>\n" +
+                                "<input type=\"text\" id=\""+name+"\" name=\""+name+"\" value=\"\"><br>";
+                break;
+                case "password":
+                    fields += "<label for=\""+name+"\">"+name+":</label><br>\n" +
+                                "<input type=\"password\" id=\""+name+"\" name=\""+name+"\" value=\"\"><br>";
+                break;
+                case "textarea":
+                    fields += "<label for=\""+name+"\">"+name+":</label><br>\n" +
+                                "<textarea id=\""+name+"\" name=\""+name+"\"></textarea><br>";
+                break;
+                case "date":
+                    fields += "<label for=\""+name+"\">"+name+":</label><br>\n" +
+                                "<input type=\"date\" id=\""+name+"\" name=\""+name+"\" value=\"\"><br>";
+                break;
+                case "image":
+                    fields += "<label for=\""+name+"\">"+name+":</label><br>\n" +
+                                "<img src=\"\" id=\""+name+"\" name=\""+name+"\" alt=\"\"><br>";
+                break;
+                case "label":
+                    fields += "<label for=\""+name+"\">"+name+":</label><br>\n";
+                break;
+                case "checkbox":
+                    fields +="<label for=\""+name+"\"> </label>\n"+
+                             "<input type=\"checkbox\" id=\""+name+"\" name=\""+name+"\" value=\"\"><br>";
+                break;                
+                case "select":
+                    fields +="<label for=\""+name+"\"> </label>\n"+
+                            "<select name=\""+name+"\" id=\""+name+"\">\n" +
+                            "  <option value=\"1\">val1</option>\n" +
+                            "  <option value=\"2\">val2</option>\n" +
+                            "  <option value=\"3\">val3</option>\n" +
+                            "  <option value=\"4\">val4</option>\n" +
+                            "</select><br>";
+                break;
+                case "multiselect":
+                    fields +="<label for=\""+name+"\"> </label>\n"+
+                            "<select name=\""+name+"\" id=\""+name+"\" size=\"4\" multiple>\n" +
+                            "  <option value=\"1\">val1</option>\n" +
+                            "  <option value=\"2\">val2</option>\n" +
+                            "  <option value=\"3\">val3</option>\n" +
+                            "  <option value=\"4\">val4</option>\n" +
+                            "</select>";
+                break;                
+                default:
+                // code block
+            }
+
+        }
+
+        String filecontents = FileHandler.openFile("form.template");
+//            System.out.println("for " + table);
+//            filecontents = filecontents.replace("{entity}", table.getName().substring(0, 1).toUpperCase() + table.getName().substring(1));
+               filecontents = filecontents.replace("{fields}", fields);
+//
+            System.out.println(filecontents);
+//            System.out.println(table);
+//            System.out.println("-----------------------");
+            FileHandler.createFile("C:\\wamp64\\www\\testphp\\"+table+"\\" + table, filecontents);
+            
+            
+
+    }
 }
