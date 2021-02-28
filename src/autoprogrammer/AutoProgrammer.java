@@ -3,38 +3,58 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package modelcreator;
+package autoprogrammer;
 
+import handlers.MysqlHandler;
+import handlers.FileHandler;
 import com.mysql.jdbc.Connection;
+import com.mysql.jdbc.Field;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
 
 /**
  *
  * @author themhz
  */
-public class Modelcreator {
+public class AutoProgrammer {
 
     /**
      * @param args the command line arguments
      */
     public static void main(String[] args) throws SQLException, ClassNotFoundException {
-         createModels();
+         //createModels();
         //FileHandler.createFile();
         //FileHandler.openFile("C:\\wamp64\\www\\testphp\\test2.php");
+        createViewsAndControllers();
     }
     
     
     
-    
-    public static void createModels() throws SQLException, ClassNotFoundException {
+    public static ArrayList<MySqlTable> createViewsAndControllers() throws SQLException, ClassNotFoundException{
         Class.forName("com.mysql.jdbc.Driver");
         Connection con = (Connection) DriverManager.getConnection("jdbc:mysql://localhost:3306/erg3_theotokatos", "root", "");
-        ResultSet rs = MysqlCon.getAllTables(con);
+        //ResultSet rsTables = MysqlHandler.getAllTables();
+        ArrayList<MySqlTable> tables = MysqlHandler.getAllTables();
+                
         
-        String fields = "";
-        String table = "";
+                        
+        for(MySqlTable table :tables){                        
+            ArrayList<MySqlField> fields = MysqlHandler.getAllFields(table.getName()).getFields();
+            table.setFields(fields);
+        }
+        
+        return tables;
+    }
+    
+    
+    public static void createModels() throws SQLException, ClassNotFoundException {
+        
+        ArrayList<MySqlTable> tables = MysqlHandler.getAllTables();
+
+        String fieldname = "";
+//        String table = "";
         String values = "";
         String setvalues = "";        
         String selectarray = "";
@@ -44,45 +64,47 @@ public class Modelcreator {
         
         int counter=0;
         int selectcounter=0;
-        while (rs.next()) {
+        //while (rs.next()) {
+        for(MySqlTable table: tables){
             //Παίρνει όλους τους πίνακες
             //System.out.println(rs.getString("TABLE_NAME"));
-            table = rs.getString("TABLE_NAME");
+            //table = rs.getString("TABLE_NAME");
             //Για κάθε πίνακα πηγαίνει και διαβάζει όλα τα παιδία
-            
-            ResultSet rs2 = MysqlCon.getAllFields(con, table);
+            ArrayList<MySqlField> fields = MysqlHandler.getTableFields(table.getName());
+                     //= MysqlHandler.getAllFields(table.getName());
             //System.out.println("---------------------------------------");
-            while (rs2.next()) {                
+            //while (rs2.next()) {                
+            for(MySqlField field :fields){
                // System.out.println(rs2.getString("COLUMN_NAME")+ " " + rs2.getString("COLUMN_TYPE"));                
                 //System.out.println(rs2.getString("COLUMN_NAME")+ " " + rs2.getString("EXTRA"));
                 
-                if(!rs2.getString("EXTRA").toString().equals("auto_increment")){
+                if(!field.getIsprimary().equals("PRI")){
                     //create insert fields
                     if(counter == 0){
 
-                        fields=rs2.getString("COLUMN_NAME");
-                        values=":"+rs2.getString("COLUMN_NAME");                        
-                        updatecols = rs2.getString("COLUMN_NAME")+"=:" + rs2.getString("COLUMN_NAME");
+                        fieldname = field.getName();
+                        values=":"+field.getName();                        
+                        updatecols = field.getName()+"=:" + field.getName();
                     }else{
-                        fields+=","+rs2.getString("COLUMN_NAME");
-                        values+=",:"+rs2.getString("COLUMN_NAME");
-                        updatecols += "," + rs2.getString("COLUMN_NAME")+"=:"+rs2.getString("COLUMN_NAME");
+                        fieldname+=","+field.getName();
+                        values+=",:"+field.getName();
+                        updatecols += "," + field.getName()+"=:"+field.getName();
                     }
                     
                     
                     //return selected fields
-                    setvalues +="$values[\":"+rs2.getString("COLUMN_NAME")+"\"] = $obj->"+rs2.getString("COLUMN_NAME")+";\n\t";
+                    setvalues +="$values[\":"+field.getName()+"\"] = $obj->"+field.getName()+";\n\t";
                     
-                    updatevalues +="$values[\":"+rs2.getString("COLUMN_NAME")+"\"] = $obj->"+rs2.getString("COLUMN_NAME")+";\n\t";
+                    updatevalues +="$values[\":"+field.getName()+"\"] = $obj->"+field.getName()+";\n\t";
                     
                     
                     counter++;  
                 }
                 
                  if(selectcounter == 0){
-                    selectarray = "'"+rs2.getString("COLUMN_NAME")+"' => $row->"+rs2.getString("COLUMN_NAME")+"\n\t\t";
+                    selectarray = "'"+field.getName()+"' => $row->"+field.getName()+"\n\t\t";
                  }else{
-                     selectarray += ",'"+rs2.getString("COLUMN_NAME")+"' => $row->"+rs2.getString("COLUMN_NAME")+"\n\t\t";
+                     selectarray += ",'"+field.getName()+"' => $row->"+field.getName()+"\n\t\t";
                  }
                  
                  selectcounter++;
@@ -94,9 +116,9 @@ public class Modelcreator {
             String filecontents = FileHandler.openFile("model_sample.template");
             //System.out.println(filecontents);
             System.out.println("for " + table);
-            filecontents = filecontents.replace("{entity}", table.substring(0, 1).toUpperCase() + table.substring(1));
-            filecontents = filecontents.replace("{table}", table);
-            filecontents = filecontents.replace("{fields}", fields);
+            filecontents = filecontents.replace("{entity}", table.getName().substring(0, 1).toUpperCase() + table.getName().substring(1));
+            filecontents = filecontents.replace("{table}", table.getName());
+            filecontents = filecontents.replace("{fields}", fieldname);
             filecontents = filecontents.replace("{values}", values);
             filecontents = filecontents.replace("{setvalues}", setvalues);
             filecontents = filecontents.replace("{selectarray}", selectarray);
@@ -109,13 +131,13 @@ public class Modelcreator {
             setvalues = "";            
             System.out.println(filecontents);
             System.out.println("-----------------------");
-            FileHandler.createFile("C:\\wamp64\\www\\testphp\\" + table, filecontents);
+            FileHandler.createFile("C:\\wamp64\\www\\testphp\\" + table.getName(), filecontents);
             //Για κάθε ένα αρχείο
             
             
         }
         
-        con.close();
+        //
     }
     
 }
