@@ -5,6 +5,7 @@
  */
 package handlers;
 
+import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -34,8 +35,22 @@ public class FileHandler {
     }
     
     public static void createFile(String filepath, String contents){
-        try {  
+        try {              
             Writer w = new FileWriter(filepath+".php");  
+            String content = contents;
+            w.write(content);  
+            w.close();  
+            System.out.println("Done");  
+        } catch (IOException e) {  
+            e.printStackTrace();  
+        }  
+    }
+    
+    public static void createFile(String filepath, String filename, String contents){
+        try {  
+            File dir = new File(filepath);
+            dir.mkdirs();
+            Writer w = new FileWriter(filepath+filename+".php");  
             String content = contents;
             w.write(content);  
             w.close();  
