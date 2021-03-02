@@ -166,35 +166,38 @@ public class mainform extends javax.swing.JFrame {
     private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
 
         DefaultTableModel model = new DefaultTableModel();
-        String header[] = new String[]{"name", "datatpe", "fieldtype"};
+        String header[] = new String[]{"name", "datatpe", "fieldtype", "foreintable", "foreinkey"};
         model.setColumnIdentifiers(header);
         tblfields.setModel(model);
         String table = ddltables.getSelectedItem().toString();
         //ArrayList<MySqlField> fields = new ArrayList<>();
         
         //ArrayList<MySqlTable> tables = createViewsAndControllers();            
-        ArrayList<MySqlField> fields = MysqlHandler.getAllFields(table).getFields();
+        ArrayList<MySqlField> fields = MysqlHandler.getTableFields(table);
 
         for (MySqlField field : fields) {
 
-            model.addRow(new Object[]{field.getName(), field.getDatatype(), "HTML"});
+            model.addRow(new Object[]{field.getName(), field.getDatatype(), "HTML", field.getForeintable(), field.getForeinkey()});
 
         }
 
         TableColumn sportColumn = tblfields.getColumnModel().getColumn(2);
         JComboBox comboBox = new JComboBox();
-        comboBox.addItem("textbox");
+        comboBox.addItem("textbox");        
         comboBox.addItem("password");
         comboBox.addItem("textarea");
         comboBox.addItem("date");
+        comboBox.addItem("datetime");
+        comboBox.addItem("time");
         comboBox.addItem("image");
         comboBox.addItem("label");
         comboBox.addItem("checkbox");
         comboBox.addItem("multicheckbox");
         comboBox.addItem("select");
         comboBox.addItem("multiselect");
-
-        comboBox.setSelectedIndex(1);
+        comboBox.addItem("email");
+        comboBox.addItem("phone");
+        
         sportColumn.setCellEditor(new DefaultCellEditor(comboBox));
         //Θέτω στον πίνακα το μοντέλο
 

@@ -211,7 +211,7 @@ public class AutoProgrammer {
             System.out.println(filecontents);
 //            System.out.println(table);
 //            System.out.println("-----------------------");
-            FileHandler.createFile("C:\\wamp64\\www\\testphp\\"+table+"\\" + table, filecontents);
+            FileHandler.createFile("C:\\wamp64\\www\\testphp\\"+table+"\\", table, filecontents);
             
             
 

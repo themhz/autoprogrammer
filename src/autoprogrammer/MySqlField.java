@@ -16,15 +16,33 @@ public class MySqlField {
     private String size;
     private String foreintable;
     private String isprimary;
-    private String isforeinkey;
+    private String foreinkey;
+    private String isnullable;
 
-    public MySqlField(String name, String datatype, String size, String foreintable, String isprimary, String isforeinkey) {
+    public MySqlField(String name, String datatype, String size, String foreintable, String isprimary, String foreinkey, String isnullable) {
         this.name = name;
         this.datatype = datatype;
         this.size = size;
         this.foreintable = foreintable;
         this.isprimary = isprimary;
-        this.isforeinkey = isforeinkey;
+        this.foreinkey = foreinkey;
+        this.isnullable = isnullable;
+    }
+
+    public String getForeinkey() {
+        return foreinkey;
+    }
+
+    public void setForeinkey(String foreinkey) {
+        this.foreinkey = foreinkey;
+    }
+
+    public String getIsnullable() {
+        return isnullable;
+    }
+
+    public void setIsnullable(String isnullable) {
+        this.isnullable = isnullable;
     }
 
     public String getName() {
@@ -67,12 +85,12 @@ public class MySqlField {
         this.isprimary = isprimary;
     }
 
-    public String isIsforeinkey() {
-        return isforeinkey;
+    public String Isforeinkey() {
+        return foreinkey;
     }
 
     public void setIsforeinkey(String isforeinkey) {
-        this.isforeinkey = isforeinkey;
+        this.foreinkey = isforeinkey;
     }
     
     

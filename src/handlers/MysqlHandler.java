@@ -61,7 +61,7 @@ public class MysqlHandler {
             ArrayList<MySqlField> fields = new ArrayList<>();
             while (rs.next()) {
                 //String name, String datatype, String size, String foreintable, String isprimary, String isforeinkey
-                MySqlField field = new MySqlField(rs.getString("COLUMN_NAME"), rs.getString("DATA_TYPE"), rs.getString("CHARACTER_MAXIMUM_LENGTH"), "", rs.getString("COLUMN_KEY"), "");
+                MySqlField field = new MySqlField(rs.getString("COLUMN_NAME"), rs.getString("DATA_TYPE"), rs.getString("CHARACTER_MAXIMUM_LENGTH"), "", rs.getString("COLUMN_KEY"), "", "");
                 fields.add(field);
 
             }
@@ -108,17 +108,20 @@ public class MysqlHandler {
             con = (Connection) DriverManager.getConnection("jdbc:mysql://localhost:3306/erg3_theotokatos", "root", "");
             //here sonoo is database name, root is username and password  
             Statement stmt = con.createStatement();
-            ResultSet rs = stmt.executeQuery("select * \n"
-                    + "  from information_schema.columns \n"
-                    + " where table_schema = 'erg3_theotokatos' \n"
-                    + "   and table_name = '" + tablename + "'\n"
-                    + "   ;");
+            ResultSet rs = stmt.executeQuery("select a.*,c.REFERENCED_TABLE_NAME,c.REFERENCED_COLUMN_NAME\n" +
+                                        "       from information_schema.columns a \n" +
+                                        "    left join (SELECT  b.* FROM information_schema.key_column_usage b \n" +
+                                        "				WHERE b.CONSTRAINT_SCHEMA = 'erg3_theotokatos' \n" +
+                                        "				and b.table_schema = 'erg3_theotokatos'\n" +
+                                        "				and b.table_name = '"+tablename+"' and b.referenced_table_name is not null) c on c.column_name = a.column_name\n" +
+                                        "   where a.table_schema = 'erg3_theotokatos' and a.table_name = '"+tablename+"'\n" +
+                                        "   order by a.ORDINAL_POSITION");
 
             
             ArrayList<MySqlField> fields = new ArrayList<>();
             while (rs.next()) {
                 //String name, String datatype, String size, String foreintable, String isprimary, String isforeinkey
-                MySqlField field = new MySqlField(rs.getString("COLUMN_NAME"), rs.getString("DATA_TYPE"), rs.getString("CHARACTER_MAXIMUM_LENGTH"), "", rs.getString("COLUMN_KEY"), "");
+                MySqlField field = new MySqlField(rs.getString("COLUMN_NAME"), rs.getString("DATA_TYPE"), rs.getString("CHARACTER_MAXIMUM_LENGTH"), rs.getString("REFERENCED_TABLE_NAME"), rs.getString("COLUMN_KEY"), rs.getString("REFERENCED_COLUMN_NAME"), rs.getString("IS_NULLABLE"));
                 fields.add(field);
 
             }            
